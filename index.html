@@ -105,6 +105,8 @@
         <thead>
             <tr>
                 <th>Time</th>
+                <th>Saturday</th>
+                <th>Sunday</th>
                 <th>Monday</th>
                 <th>Tuesday</th>
                 <th>Wednesday</th>
@@ -113,38 +115,6 @@
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td><input type="time" value="09:00"></td>
-                <td><input type="text" placeholder="Enter task..."></td>
-                <td><input type="text" placeholder="Enter task..."></td>
-                <td><input type="text" placeholder="Enter task..."></td>
-                <td><input type="text" placeholder="Enter task..."></td>
-                <td><input type="text" placeholder="Enter task..."></td>
-            </tr>
-            <tr>
-                <td><input type="time" value="10:00"></td>
-                <td><input type="text" placeholder="Enter task..."></td>
-                <td><input type="text" placeholder="Enter task..."></td>
-                <td><input type="text" placeholder="Enter task..."></td>
-                <td><input type="text" placeholder="Enter task..."></td>
-                <td><input type="text" placeholder="Enter task..."></td>
-            </tr>
-            <tr>
-                <td><input type="time" value="11:00"></td>
-                <td><input type="text" placeholder="Enter task..."></td>
-                <td><input type="text" placeholder="Enter task..."></td>
-                <td><input type="text" placeholder="Enter task..."></td>
-                <td><input type="text" placeholder="Enter task..."></td>
-                <td><input type="text" placeholder="Enter task..."></td>
-            </tr>
-            <tr>
-                <td><input type="time" value="12:00"></td>
-                <td><input type="text" placeholder="Enter task..."></td>
-                <td><input type="text" placeholder="Enter task..."></td>
-                <td><input type="text" placeholder="Enter task..."></td>
-                <td><input type="text" placeholder="Enter task..."></td>
-                <td><input type="text" placeholder="Enter task..."></td>
-            </tr>
         </tbody>
     </table>
 
@@ -154,14 +124,24 @@
     </div>
     <div class="button-container">
         <button onclick="saveData()">Save Timetable</button>
-        <button onclick="loadData()">Load Timetable</button>
+        <button onclick="loadData('fromButton')">Load Timetable</button>
         <button onclick="clearData()">Clear Data</button>
     </div>
     <div class="button-container">
         <button onclick="downloadData()">Download Timetable</button>
+        <button color="red" onclick="clearLocalStorage()">RESET ALL</button>
     </div>
 
     <script>
+        function clearLocalStorage() {
+            let result = window.confirm("This will reset the table and clear all storage. Do you wish to proceed?");
+            if(result)
+            {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+
         function addRow() {
             var table = document.getElementById("timetable").getElementsByTagName('tbody')[0];
             var newRow = table.insertRow();
@@ -173,7 +153,7 @@
             timeCell.appendChild(timeInput);
             newRow.appendChild(timeCell);
 
-            for(var i = 0; i < 5; i++)
+            for(var i = 0; i < 7; i++)
             {
                 var taskCell=document.createElement("td");
                 var taskInput=document.createElement("input");
@@ -191,6 +171,14 @@
         function deleteRow() {
             var table=document.getElementById("timetable").getElementsByTagName('tbody')[0];
             var newRow=table.deleteRow(table.rows.length - 1);
+            saveRowsToLocalStorage();
+        }
+
+        function deleteAllRows() {
+            var table=document.getElementById("timetable").getElementsByTagName('tbody')[0];
+            for(var i = 0; i < table.rows.length; i++) {
+                table.deleteRow(i);
+            }
         }
 
         function saveRowsToLocalStorage() {
@@ -199,18 +187,16 @@
 
             tableRows.forEach(function(row) {
                 var timeInput=row.querySelector("td input[type='time']");
-                var task1Input=row.querySelector("td input[type='text']:nth-child(1)");
-                var task2Input=row.querySelector("td input[type='text']:nth-child(2)");
-                var task3Input=row.querySelector("td input[type='text']:nth-child(3)");
-                var task4Input=row.querySelector("td input[type='text']:nth-child(4)");
-                var task5Input=row.querySelector("td input[type='text']:nth-child(5)");
+                var textInputs=row.querySelectorAll("td input[type='text']");
+
+                var tasks=Array.from(textInputs).reduce((acc, input, index) => {
+                    acc[`task${index+1}`]=input.value;
+                    return acc;
+                }, {});
+
                 rows.push({
                     time: timeInput.value,
-                    task1: task1Input.value,
-                    task2: task2Input.value,
-                    task3: task3Input.value,
-                    task4: task4Input.value,
-                    task5: task5Input.value
+                    ...tasks
                 });
             });
 
@@ -233,21 +219,22 @@
                     timeCell.appendChild(timeInput);
                     newRow.appendChild(timeCell);
 
-                    for(var i = 0; i < 5; i++)
+                    for(var i = 0; i < 7; i++)
                     {
                         var taskCell=document.createElement("td");
                         var taskInput=document.createElement("input");
                         taskInput.type="text";
-                        taskInput.value=rowData.task;
+                        taskInput.value= typeof rowData.task === "undefined" ? "" : rowData.task;
                         taskInput.placeholder="Enter task...";
                         taskCell.appendChild(taskInput);
                         newRow.appendChild(taskCell);
                     }
 
-
                     document.querySelector("#timetable tbody").appendChild(newRow);
                 });
             }
+
+            loadData('fromMethod');
         }
 
         function saveData() {
@@ -263,7 +250,7 @@
             localStorage.setItem("timetable", JSON.stringify(timetable));
         }
 
-        function loadData() {
+        function loadData(sourceCaller) {
             const timetable=JSON.parse(localStorage.getItem("timetable"));
 
             if(timetable) {
@@ -276,7 +263,7 @@
                         input.value=data.tasks[index]||"";
                     });
                 });
-            } else {
+            } else if(sourceCaller === "fromButton") {
                 alert("No saved timetable found!");
             }
         }
