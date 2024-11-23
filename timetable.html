@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timetable with Editable Tasks (Save to File)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 15px 0;
+            font-size: 24px;
+        }
+
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid #ddd;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        td {
+            background-color: #f9f9f9;
+        }
+
+        tr:nth-child(even) td {
+            background-color: #f1f1f1;
+        }
+
+        input[type="time"] {
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        input[type="text"] {
+            padding: 8px;
+            font-size: 16px;
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin: 20px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        Weekly Timetable (Editable & Save)
+    </header>
+
+    <table id="timetable">
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Monday</th>
+                <th>Tuesday</th>
+                <th>Wednesday</th>
+                <th>Thursday</th>
+                <th>Friday</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><input type="time" value="09:00"></td>
+                <td><input type="text" placeholder="Enter task..."></td>
+                <td><input type="text" placeholder="Enter task..."></td>
+                <td><input type="text" placeholder="Enter task..."></td>
+                <td><input type="text" placeholder="Enter task..."></td>
+                <td><input type="text" placeholder="Enter task..."></td>
+            </tr>
+            <tr>
+                <td><input type="time" value="10:00"></td>
+                <td><input type="text" placeholder="Enter task..."></td>
+                <td><input type="text" placeholder="Enter task..."></td>
+                <td><input type="text" placeholder="Enter task..."></td>
+                <td><input type="text" placeholder="Enter task..."></td>
+                <td><input type="text" placeholder="Enter task..."></td>
+            </tr>
+            <tr>
+                <td><input type="time" value="11:00"></td>
+                <td><input type="text" placeholder="Enter task..."></td>
+                <td><input type="text" placeholder="Enter task..."></td>
+                <td><input type="text" placeholder="Enter task..."></td>
+                <td><input type="text" placeholder="Enter task..."></td>
+                <td><input type="text" placeholder="Enter task..."></td>
+            </tr>
+            <tr>
+                <td><input type="time" value="12:00"></td>
+                <td><input type="text" placeholder="Enter task..."></td>
+                <td><input type="text" placeholder="Enter task..."></td>
+                <td><input type="text" placeholder="Enter task..."></td>
+                <td><input type="text" placeholder="Enter task..."></td>
+                <td><input type="text" placeholder="Enter task..."></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="button-container">
+        <button onclick="addRow()">Add Row</button>
+        <button onclick="deleteRow()">Delete Row</button>
+        <button onclick="saveData()">Save Timetable</button>
+        <button onclick="loadData()">Load Timetable</button>
+        <button onclick="downloadData()">Download Timetable</button>
+        <button onclick="clearData()">Clear Data</button>
+    </div>
+
+    <script>
+        function addRow() {
+            var table = document.getElementById("timetable").getElementsByTagName('tbody')[0];
+            var newRow = table.insertRow();
+
+            var timeCell=document.createElement("td");
+            var timeInput=document.createElement("input");
+            timeInput.type="time";
+            timeInput.value="09:00";
+            timeCell.appendChild(timeInput);
+            newRow.appendChild(timeCell);
+
+            for(var i = 0; i < 5; i++)
+            {
+                var taskCell=document.createElement("td");
+                var taskInput=document.createElement("input");
+                taskInput.type="text";
+                taskInput.placeholder="Enter task...";
+                taskCell.appendChild(taskInput);
+
+                newRow.appendChild(taskCell);
+            }
+
+            document.querySelector("#timetable tbody").appendChild(newRow);
+            saveRowsToLocalStorage();
+        }
+
+        function deleteRow() {
+            var table=document.getElementById("timetable").getElementsByTagName('tbody')[0];
+            var newRow=table.deleteRow(table.rows.length - 1);
+        }
+
+        function saveRowsToLocalStorage() {
+            var rows=[];
+            var tableRows=document.querySelectorAll("#timetable tbody tr");
+
+            tableRows.forEach(function(row) {
+                var timeInput=row.querySelector("td input[type='time']");
+                var task1Input=row.querySelector("td input[type='text']:nth-child(1)");
+                var task2Input=row.querySelector("td input[type='text']:nth-child(2)");
+                var task3Input=row.querySelector("td input[type='text']:nth-child(3)");
+                var task4Input=row.querySelector("td input[type='text']:nth-child(4)");
+                var task5Input=row.querySelector("td input[type='text']:nth-child(5)");
+                rows.push({
+                    time: timeInput.value,
+                    task1: task1Input.value,
+                    task2: task2Input.value,
+                    task3: task3Input.value,
+                    task4: task4Input.value,
+                    task5: task5Input.value
+                });
+            });
+
+            localStorage.setItem("tableRows", JSON.stringify(rows));
+        }
+
+        function loadRowsFromLocalStorage() {
+            var savedRows=localStorage.getItem("tableRows");
+
+            if(savedRows) {
+                savedRows=JSON.parse(savedRows);
+
+                savedRows.forEach(function(rowData) {
+                    var newRow=document.createElement("tr");
+
+                    var timeCell=document.createElement("td");
+                    var timeInput=document.createElement("input");
+                    timeInput.type="time";
+                    timeInput.value=rowData.time;
+                    timeCell.appendChild(timeInput);
+                    newRow.appendChild(timeCell);
+
+                    for(var i = 0; i < 5; i++)
+                    {
+                        var taskCell=document.createElement("td");
+                        var taskInput=document.createElement("input");
+                        taskInput.type="text";
+                        taskInput.value=rowData.task;
+                        taskInput.placeholder="Enter task...";
+                        taskCell.appendChild(taskInput);
+                        newRow.appendChild(taskCell);
+                    }
+
+
+                    document.querySelector("#timetable tbody").appendChild(newRow);
+                });
+            }
+        }
+
+        function saveData() {
+            const timetable=[];
+            const rows=document.querySelectorAll("#timetable tbody tr");
+
+            rows.forEach(row => {
+                const time=row.querySelector("td input[type='time']").value;
+                const tasks=Array.from(row.querySelectorAll("td input[type='text']")).map(input => input.value);
+                timetable.push({time, tasks});
+            });
+
+            localStorage.setItem("timetable", JSON.stringify(timetable));
+        }
+
+        function loadData() {
+            const timetable=JSON.parse(localStorage.getItem("timetable"));
+
+            if(timetable) {
+                const rows=document.querySelectorAll("#timetable tbody tr");
+                timetable.forEach((data, rowIndex) => {
+                    const row=rows[rowIndex];
+                    row.querySelector("td input[type='time']").value=data.time;
+                    const taskInputs=row.querySelectorAll("td input[type='text']");
+                    taskInputs.forEach((input, index) => {
+                        input.value=data.tasks[index]||"";
+                    });
+                });
+            } else {
+                alert("No saved timetable found!");
+            }
+        }
+
+        function downloadData() {
+            const timetable=JSON.parse(localStorage.getItem("timetable"));
+
+            if(timetable) {
+                const dataStr=JSON.stringify(timetable, null, 2);
+                const blob=new Blob([dataStr], {type: "application/json"});
+
+                const link=document.createElement("a");
+                link.href=URL.createObjectURL(blob);
+                link.download="timetable.json";
+
+                link.click();
+            } else {
+                alert("No timetable data available to download.");
+            }
+        }
+
+        function clearData() {
+            localStorage.removeItem("timetable");
+
+            const rows=document.querySelectorAll("#timetable tbody tr");
+            rows.forEach(row => {
+                row.querySelector("td input[type='time']").value="09:00";
+                const taskInputs=row.querySelectorAll("td input[type='text']");
+                taskInputs.forEach(input => {
+                    input.value="";
+                });
+            });
+        }
+
+        window.onload = loadRowsFromLocalStorage;
+    </script>
+
+</body>
+
+</html>
